@@ -158,7 +158,6 @@ def comparePrices(onlineProduct, product, vars=None):
         shopPrices.sort(key=lambda x: x[0])
 
         for i in range(len(prices)):
-            print(prices[i], shopPrices[i])
             if prices[i] != shopPrices[i][0]:
                 log("NOT OK", product.id, shopPrices[i][1])
                 log("Online price is ", prices[i], "while real price is: ", shopPrices[i][0])
