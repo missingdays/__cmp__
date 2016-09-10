@@ -96,9 +96,12 @@ def getShopProducts():
         if nextRow[1] != '':
             i = rownum + 1
 
-            while shopFile.row_values(i)[2] == '' and i < rownum + 5:
-                shopProduct.vars.append(shopFile.row_values(i))
-                i += 1
+            try:
+                while shopFile.row_values(i)[2] == '' and i < rownum + 5:
+                    shopProduct.vars.append(shopFile.row_values(i))
+                    i += 1
+            except Exception:
+                break
 
         shopProducts.append(shopProduct)
 
@@ -166,8 +169,10 @@ def runComparrison():
 
     clearLogs()
 
+    productSKU = '﻿"Product SKU"'
+
     onlineProducts = getOnlineProducts()
-    onlineProductsID = onlineProducts['﻿"Product SKU"']
+    onlineProductsID = onlineProducts[productSKU]
 
     shopProducts = getShopProducts()
 
@@ -182,7 +187,7 @@ def runComparrison():
             continue
 
         if len(shopProducts[shopProduct].vars) == 0:
-            onlineProduct = onlineProducts.loc[onlineProducts['﻿"Product SKU"'] == id]
+            onlineProduct = onlineProducts.loc[onlineProducts[productSKU] == id]
 
             onlinePrice = int(onlineProduct.iloc[0]['Price'])
             shopPrice = int(shopProducts[shopProduct].price)
@@ -194,7 +199,7 @@ def runComparrison():
                 log("Online price is ", onlinePrice, "while real price is: ", shopPrice)
         else:
             product = shopProducts[shopProduct]
-            onlineProduct = onlineProducts.loc[onlineProducts['﻿"Product SKU"'] == id]
+            onlineProduct = onlineProducts.loc[onlineProducts[productSKU] == id]
             onlineName = onlineProduct.iloc[0]['Product Name']
 
             onlineVars = findOnlineVars(onlineName, onlineProducts)
