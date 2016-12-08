@@ -1,3 +1,6 @@
+
+# -*- coding: utf-8 -*-
+
 from tkinter import *
 from tkinter.filedialog import *
 import pandas as pd
@@ -54,7 +57,7 @@ def processID(id):
     if type(id) != str:
         id = repr(int(id))
 
-    special = ("бут_п_1")
+    special = (u"бут_п_1")
 
     if id in special:
         return id
@@ -128,7 +131,7 @@ def roundShopPrice(a):
 
 def filterByName(name):
     def _filter(x):
-        return x.find(name) != -1
+        return str(x).find(name) != -1
     return _filter
 
 def findOnlineVars(name, onlineProducts):
@@ -169,7 +172,7 @@ def runComparrison():
 
     clearLogs()
 
-    productSKU = '﻿"Product SKU"'
+    productSKU = 'Product SKU'
 
     onlineProducts = getOnlineProducts()
     onlineProductsID = onlineProducts[productSKU]
@@ -177,8 +180,11 @@ def runComparrison():
     shopProducts = getShopProducts()
 
     for id in onlineProductsID:
-        if type(id) != str:
+
+        if pd.isnull(id):
             continue
+
+        id = str(int(id))
 
         shopProduct = getShopProductByID(shopProducts, id)
 
@@ -187,7 +193,7 @@ def runComparrison():
             continue
 
         if len(shopProducts[shopProduct].vars) == 0:
-            onlineProduct = onlineProducts.loc[onlineProducts[productSKU] == id]
+            onlineProduct = onlineProducts.loc[onlineProducts[productSKU] == float(id)]
 
             onlinePrice = int(onlineProduct.iloc[0]['Price'])
             shopPrice = int(shopProducts[shopProduct].price)
@@ -199,7 +205,7 @@ def runComparrison():
                 log("Online price is ", onlinePrice, "while real price is: ", shopPrice)
         else:
             product = shopProducts[shopProduct]
-            onlineProduct = onlineProducts.loc[onlineProducts[productSKU] == id]
+            onlineProduct = onlineProducts.loc[onlineProducts[productSKU] == float(id)]
             onlineName = onlineProduct.iloc[0]['Product Name']
 
             onlineVars = findOnlineVars(onlineName, onlineProducts)
@@ -244,5 +250,5 @@ onlineFileLabel.pack(side=TOP)
 
 runButton.pack(side=TOP)
 
-root.state('zoomed')
+#root.state('zoomed')
 root.mainloop()
