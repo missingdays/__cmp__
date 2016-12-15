@@ -157,16 +157,21 @@ def comparePrices(onlineProduct, product, vars=None):
 
         prices.sort()
 
-        for var in product.vars:
+        for i in range(len(product.vars)):
+            var = product.vars[i]
+
             weight = float(processWeight(var[1]))
-            shopPrices.append((roundShopPrice(weight*var[5]), var[1]))
+            try:
+                shopPrices.append((roundShopPrice(weight*var[5]), var[1], i))
+            except Exception:
+                print("There is wierd row {}", str(var))
 
         shopPrices.sort(key=lambda x: x[0])
 
-        for i in range(len(prices)):
-            if prices[i] != shopPrices[i][0]:
-                log("NOT OK", product.id, shopPrices[i][1])
-                log("Online price is ", prices[i], "while real price is: ", shopPrices[i][0])
+        for price, name, index in shopPrices:
+            if prices[index] != price:
+                log("NOT OK", product.id, name)
+                log("Online price is ", prices[index], "while real price is: ", price)
 
 def runComparrison():
 
