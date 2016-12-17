@@ -177,12 +177,24 @@ def runComparrison():
 
     clearLogs()
 
-    productSKU = 'Product SKU'
+    productSKU = None
+    onlineProducts = None
+    shopProducts = None
 
-    onlineProducts = getOnlineProducts()
-    onlineProductsID = onlineProducts[productSKU]
+    try:
+        productSKU = 'Product SKU'
 
-    shopProducts = getShopProducts()
+        onlineProducts = getOnlineProducts()
+        onlineProductsID = onlineProducts[productSKU]
+
+        shopProducts = getShopProducts()
+    except Exception:
+        productSKU = u'\ufeff"Product SKU"'
+
+        onlineProducts = getOnlineProducts()
+        onlineProductsID = onlineProducts[productSKU]
+
+        shopProducts = getShopProducts()
 
     for id in onlineProductsID:
 
