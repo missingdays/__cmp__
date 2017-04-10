@@ -140,7 +140,14 @@ def findOnlineVars(name, onlineProducts):
 
     return vars
 
+def log_no_price(id):
+    log("NOT OK", id)
+    log("No price found for ", id)
 def comparePrices(onlineProduct, product, vars=None):
+    if product.price == '':
+        log_no_price(product.id)
+        return
+
     if vars is None:
         onlinePrice = onlineProduct.iloc[0]["Price"]
         shopPrice = roundShopPrice(int(product.price) * float(processWeight(product.vars[0][1])))
@@ -173,6 +180,9 @@ def comparePrices(onlineProduct, product, vars=None):
                 log("NOT OK", product.id, name)
                 log("Online price is ", prices[index], "while real price is: ", price)
 
+def convert_product_sku(v):
+    return v
+
 def runComparrison():
 
     clearLogs()
@@ -196,12 +206,15 @@ def runComparrison():
 
         shopProducts = getShopProducts()
 
-    for id in onlineProductsID:
+    onlineProducts[productSKU] = onlineProducts[productSKU].map(convert_product_sku)
+
+    for row in onlineProducts.itertuples():
+        id = row[1]
 
         if pd.isnull(id):
             continue
 
-        id = str(int(id))
+        id = str(id)
 
         shopProduct = getShopProductByID(shopProducts, id)
 
@@ -210,9 +223,15 @@ def runComparrison():
             continue
 
         if len(shopProducts[shopProduct].vars) == 0:
-            onlineProduct = onlineProducts.loc[onlineProducts[productSKU] == float(id)]
+            #onlineProduct = onlineProducts.loc[onlineProducts[productSKU] == float(id)]
 
-            onlinePrice = int(onlineProduct.iloc[0]['Price'])
+            #onlinePrice = int(onlineProduct.iloc[0]['Price'])
+            onlinePrice = row[3]
+
+            if shopProducts[shopProduct].price == '':
+                log_no_price(id)
+                continue
+
             shopPrice = int(shopProducts[shopProduct].price)
 
             shopPrice = roundShopPrice(shopPrice)
@@ -222,8 +241,13 @@ def runComparrison():
                 log("Online price is ", onlinePrice, "while real price is: ", shopPrice)
         else:
             product = shopProducts[shopProduct]
-            onlineProduct = onlineProducts.loc[onlineProducts[productSKU] == float(id)]
-            onlineName = onlineProduct.iloc[0]['Product Name']
+            onlineProduct = onlineProducts.loc[onlineProducts[productSKU] == str(id)]
+
+            try:
+                onlineName = onlineProduct.iloc[0]['Product Name']
+            except Exception:
+                print(id)
+                continue
 
             onlineVars = findOnlineVars(onlineName, onlineProducts)
 
@@ -237,6 +261,7 @@ def runComparrison():
                 continue
 
             comparePrices(onlineProduct, product, vars=onlineVars)
+
 shopFileButton = Button(root,
                         text="Open true prices (excel)",
                         command=openShopFile)
